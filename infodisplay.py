@@ -17,7 +17,7 @@ def pointer_chase(address, *chase_offsets):
         return val+chase_offsets[-1]
 
 def show_screenshot(width: int, height: int, data: bytes):
-    gui.draw_rect_filled((8, 10), (180, 75), black)
+    gui.draw_rect_filled((8, 10), (180, 95), black)
 
     wheelietimer = memory.read_u32(pointer_chase(0x809C18F8, 0xC, 0x10, 0x0, 0x10, 0x10, 0x2A8))
     gui.draw_text((10, 10), white, f'Wheelie timer: {wheelietimer}')
@@ -33,10 +33,16 @@ def show_screenshot(width: int, height: int, data: bytes):
 
     gui.draw_text((10, 50), white, f'Dimensions: {width}x{height}')
 
+    gui.draw_text((10, 60), white, f'Load Time: {memory.read_u32(pointer_chase(0x809BD730, 0xC, 0x0, 0x2C))}')
+
+    gui.draw_text((10, 70), white, f'Frame: {memory.read_u32(0x809C38C0)}')
+    
+    gui.draw_text((10, 80), white, f'Race Stage: {memory.read_u32(pointer_chase(0x809BD730, 0x28))}')
+
     global framecounter
-    #if framecounter%60 == 0:
-    #    img = Image.frombytes('RGBA', (width, height), data, 'raw')
-    #    img.save(f'/home/brian/Documents/Frames/frame{framecounter}.png')
+    img = Image.frombytes('RGBA', (width, height), data, 'raw')
+    img = img.crop((350, 220, 832-350, 456-50))
+    img.save(f'/home/brian/Documents/Frames/frame{framecounter}.png')
 
     framecounter += 1
 
