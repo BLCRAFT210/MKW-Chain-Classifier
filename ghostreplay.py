@@ -1,6 +1,7 @@
 #Replays a ghost on Dolphin
 from dolphin import event, controller, savestate, memory
 from libyaz0 import decompress
+from PIL import Image, ImageDraw
 
 def pointer_chase(address, *chase_offsets):
         val = memory.read_u32(address)
@@ -8,10 +9,19 @@ def pointer_chase(address, *chase_offsets):
             val = memory.read_u32(val + offset)
         return val+chase_offsets[-1]
 
+def save_screenshot(width, height, data):
+    img = Image.frombytes('RGBA', (width, height), data, 'raw')
+    img = img.crop((350, 220, 832-350, 456-50))
+    global i
+    img.save(f'/home/brian/Documents/Frames/frame{i}.png')
+    i+=1
+
 STICK_MAP = [0, 65, 70, 80, 90, 100, 110, 128, 155, 165, 175, 185, 195, 200, 255]
+i=0
+event.on_framedrawn(save_screenshot)
 
 #load ghost
-with open('/home/brian/Downloads/01m08s7737161 Kasey.rkg', 'rb') as f:
+with open('/home/brian/Downloads/01m08s7737161 Kasey.rkg', 'rb') as f, open('/home/brian/Documents/data.txt', 'w') as out:
     ghostdata = f.read()
     inputdata = ghostdata[140:]
     if (ghostdata[12] & 0x08) != 0:
@@ -75,13 +85,14 @@ with open('/home/brian/Downloads/01m08s7737161 Kasey.rkg', 'rb') as f:
         })
 
     #load savestate
-    while True:
-        await event.frameadvance()
-        if (memory.read_u32(pointer_chase(0x809BD730, 0x28)) == 0):
-            savestate.load_from_file('/home/brian/Documents/startstate.sav')
-            break
+    await event.frameadvance()
+    savestate.load_from_file('/home/brian/Documents/startstate.sav')
 
     #play back ghost
-    for inputs in inputList:
+    for i, inputs in enumerate(inputList):
+        out.write(f'{i}: {memory.read_u32(pointer_chase(0x809C18F8, 0xC, 0x10, 0x0, 0x10, 0x10, 0x2A8))}, {memory.read_f32(pointer_chase(0x809C18F8, 0xC, 0x10, 0x0, 0x10, 0x10, 0x20))}\n')
         controller.set_gc_buttons(0, inputs)
         await event.frameadvance()
+
+await event.frameadvance()
+savestate.load_from_file('/home/brian/Documents/startstate.sav')

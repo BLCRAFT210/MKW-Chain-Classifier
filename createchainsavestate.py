@@ -1,4 +1,4 @@
-#Creates a savestate for the frame that a run starts on
+#Creates a savestate for the frame on which a drop occurs
 from dolphin import event, memory, savestate
 
 def pointer_chase(address, *chase_offsets):
@@ -9,6 +9,6 @@ def pointer_chase(address, *chase_offsets):
 
 while True:
     await event.frameadvance()
-    if (memory.read_u32(pointer_chase(0x809BD730, 0x28)) == 1):
-       savestate.save_to_file('/home/brian/Documents/startstate.sav')
+    if (memory.read_u32(pointer_chase(0x809C18F8, 0xC, 0x10, 0x0, 0x10, 0x10, 0x2A8)) == 178):
+       savestate.save_to_file('/home/brian/Documents/chainstate.sav')
        break
