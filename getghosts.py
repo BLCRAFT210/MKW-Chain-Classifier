@@ -46,4 +46,5 @@ with open('leaderboard.json', 'r+') as f:
             leaderboard[entry['hash']] = entry
             f.seek(0)
             json.dump(leaderboard, f)
+            f.truncate()
             print(entry['finishTimeSimple']+' by '+entry['player']+' downloaded successfully!')
