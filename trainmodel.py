@@ -16,6 +16,8 @@ from keras import layers
 
 HEIGHT = 186
 WIDTH = 132
+NUM_CLASSES = 4
+
 
 class Conv2Plus1D(keras.layers.Layer):
     def __init__(self, filters, kernel_size, padding):

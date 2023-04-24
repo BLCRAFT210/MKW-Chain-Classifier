@@ -7,8 +7,12 @@ URL = 'https://tt.chadsoft.co.uk'
 NGHOSTS = 1000
 
 #download leaderboard
-print('Retrieving leaderboard...')
-r = requests.get(URL+'/leaderboard/08/1AE1A7D894960B38E09E7494373378D87305A163/00.json')
+print('Retrieving leaderboard... (this may time a while)')
+try:
+    r = requests.get(URL+'/leaderboard/08/1AE1A7D894960B38E09E7494373378D87305A163/00.json')
+except:
+    print('Error retrieving leaderboard.')
+    exit()
 data = json.loads(r.text)
 
 #make ghosts folder if it doesn't exist
