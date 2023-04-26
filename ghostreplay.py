@@ -28,12 +28,13 @@ STICK_MAP = [0, 65, 70, 80, 90, 100, 110, 128, 155, 165, 175, 185, 195, 200, 255
 runhash = ''
 framenumber=0
 event.on_framedrawn(save_screenshot)
+TRAINING_DIR = '/home/brian/Documents/TrainingData'
 mkdir('/home/brian/Documents/Frames')
-mkdir('/home/brian/Documents/TrainingData')
-mkdir('/home/brian/Documents/TrainingData/F')
-mkdir('/home/brian/Documents/TrainingData/H')
-mkdir('/home/brian/Documents/TrainingData/W')
-mkdir('/home/brian/Documents/TrainingData/D')
+mkdir(f'{TRAINING_DIR}')
+mkdir(f'{TRAINING_DIR}/F')
+mkdir(f'{TRAINING_DIR}/H')
+mkdir(f'{TRAINING_DIR}/W')
+mkdir(f'{TRAINING_DIR}/D')
 
 with open ('/home/brian/MKW-Chain-Classifier/leaderboard.json', 'r+') as leaderboardfile, open('/home/brian/Documents/log.txt', 'a') as out:
     out.write(f'\n\nScript started at {time.strftime("%Y-%m-%d %H:%M:%S")}\n\n')
@@ -151,11 +152,13 @@ with open ('/home/brian/MKW-Chain-Classifier/leaderboard.json', 'r+') as leaderb
                     label = 'W'
                 case _:
                     label = 'D'
-            mkdir(f'/home/brian/Documents/TrainingData/{label}')
-            for i in range(25):
-                shutil.copyfile(f'/home/brian/Documents/Frames/{chain[0]-1+i}.png', f'/home/brian/Documents/TrainingData/{label}/{i}.png')
+            dataCount = len(os.listdir(f'{TRAINING_DIR}/{label}'))
+            mkdir(f'{TRAINING_DIR}/{label}/{dataCount}')
 
-        out.write(f'Saved {len(chains)} chains\n')
+            for i in range(25):
+                shutil.copyfile(f'/home/brian/Documents/Frames/{chain[0]-1+i}.png', f'{TRAINING_DIR}/{label}/{dataCount}/{i}.png')
+            out.write(f'Saved {label} chain #{dataCount}\n')
+
         out.flush()
         
         leaderboard[runhash]['replayed'] = True
