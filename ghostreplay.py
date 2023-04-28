@@ -18,7 +18,7 @@ def pointer_chase(address, *chase_offsets):
 
 def save_screenshot(width, height, data):
     img = Image.frombytes('RGBA', (width, height), data, 'raw')
-    img = img.crop((355, 230, 832-355, 456-50))
+    img = img.crop((355, 220, 832-355, 456-50))
     img = img.convert('L')
     global framenumber
     img.save(f'/home/brian/Documents/Frames/{framenumber}.png')
@@ -135,7 +135,7 @@ with open ('/home/brian/MKW-Chain-Classifier/leaderboard.json', 'r+') as leaderb
                     start = i
                 streak += 1
             elif wheelieTimerSeq[i-1] == 181:
-                if streak<20 and wheelieTimerSeq[i+20] == 21:
+                if wheelieTimerSeq[i+25-streak] == 26-streak:
                     chains.append((start, streak))
                 streak = 0
 
