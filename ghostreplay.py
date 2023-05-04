@@ -1,8 +1,12 @@
-#Replays a ghost on Dolphin
+# Replays a ghost on Dolphin
 from dolphin import event, controller, savestate, memory
 from libyaz0 import decompress
 from PIL import Image
-import time, json, os, shutil
+import time
+import json
+import os
+import shutil
+
 
 def mkdir(path):
     try:
@@ -10,11 +14,13 @@ def mkdir(path):
     except:
         pass
 
+
 def pointer_chase(address, *chase_offsets):
-        val = memory.read_u32(address)
-        for offset in chase_offsets[:-1]:
-            val = memory.read_u32(val + offset)
-        return val+chase_offsets[-1]
+    val = memory.read_u32(address)
+    for offset in chase_offsets[:-1]:
+        val = memory.read_u32(val + offset)
+    return val+chase_offsets[-1]
+
 
 def save_screenshot(width, height, data):
     img = Image.frombytes('RGBA', (width, height), data, 'raw')
@@ -22,11 +28,13 @@ def save_screenshot(width, height, data):
     img = img.convert('L')
     global framenumber
     img.save(f'/home/brian/Documents/Frames/{framenumber}.png')
-    framenumber+=1
+    framenumber += 1
 
-STICK_MAP = [0, 65, 70, 80, 90, 100, 110, 128, 155, 165, 175, 185, 195, 200, 255]
+
+STICK_MAP = [0, 65, 70, 80, 90, 100, 110,
+             128, 155, 165, 175, 185, 195, 200, 255]
 runhash = ''
-framenumber=0
+framenumber = 0
 event.on_framedrawn(save_screenshot)
 TRAINING_DIR = '/home/brian/Documents/TrainingData'
 mkdir('/home/brian/Documents/Frames')
@@ -36,8 +44,9 @@ mkdir(f'{TRAINING_DIR}/H')
 mkdir(f'{TRAINING_DIR}/W')
 mkdir(f'{TRAINING_DIR}/D')
 
-with open ('/home/brian/MKW-Chain-Classifier/leaderboard.json', 'r+') as leaderboardfile, open('/home/brian/Documents/log.txt', 'a') as out:
-    out.write(f'\n\nScript started at {time.strftime("%Y-%m-%d %H:%M:%S")}\n\n')
+with open('/home/brian/MKW-Chain-Classifier/leaderboard.json', 'r+') as leaderboardfile, open('/home/brian/Documents/log.txt', 'a') as out:
+    out.write(
+        f'\n\nScript started at {time.strftime("%Y-%m-%d %H:%M:%S")}\n\n')
     leaderboard = json.load(leaderboardfile)
     for run in leaderboard.values():
         runhash = run['hash']
@@ -51,10 +60,12 @@ with open ('/home/brian/MKW-Chain-Classifier/leaderboard.json', 'r+') as leaderb
             inputdata = ghostdata[140:]
             if (ghostdata[12] & 0x08) != 0:
                 inputdata = decompress(inputdata)
-            faceInputCount = (inputdata[0] << 0x08) | inputdata[1] #accelerate, drift, shroom
-            directionalInputCount = (inputdata[2] << 0x08) | inputdata[3] #joystick
-            trickInputCount = (inputdata[4] << 0x08) | inputdata[5] #dpad
-            
+            # accelerate, drift, shroom
+            faceInputCount = (inputdata[0] << 0x08) | inputdata[1]
+            directionalInputCount = (
+                inputdata[2] << 0x08) | inputdata[3]  # joystick
+            trickInputCount = (inputdata[4] << 0x08) | inputdata[5]  # dpad
+
             faceInputs, directionalInputs, trickInputs = [], [], []
             currentByte = 8
 
@@ -66,7 +77,7 @@ with open ('/home/brian/MKW-Chain-Classifier/leaderboard.json', 'r+') as leaderb
                 item = (inputs & 0x04) != 0
                 faceInputs.extend([(accelerator, drift, item)] * duration)
                 currentByte += 2
-            
+
             for i in range(directionalInputCount):
                 inputs = inputdata[currentByte]
                 duration = inputdata[currentByte+1]
@@ -86,10 +97,10 @@ with open ('/home/brian/MKW-Chain-Classifier/leaderboard.json', 'r+') as leaderb
             inputList = []
             for i in range(len(faceInputs)):
                 inputList.append({
-                    'Left': trickInputs[i]==3,
-                    'Right': trickInputs[i]==4,
-                    'Down': trickInputs[i]==2,
-                    'Up': trickInputs[i]==1,
+                    'Left': trickInputs[i] == 3,
+                    'Right': trickInputs[i] == 4,
+                    'Down': trickInputs[i] == 2,
+                    'Up': trickInputs[i] == 1,
                     'Z': False,
                     'R': False,
                     'L': faceInputs[i][2],
@@ -109,20 +120,21 @@ with open ('/home/brian/MKW-Chain-Classifier/leaderboard.json', 'r+') as leaderb
                     'Connected': True
                 })
 
-        #load savestate
+        # load savestate
         await event.frameadvance()
         time.sleep(1)
         savestate.load_from_file('/home/brian/Documents/startstate.sav')
 
-        #play back ghost
+        # play back ghost
         wheelieTimerSeq = []
         for i, inputs in enumerate(inputList):
-            #out.write(f'{i}: {memory.read_u32(pointer_chase(0x809C18F8, 0xC, 0x10, 0x0, 0x10, 0x10, 0x2A8))}, {memory.read_f32(pointer_chase(0x809C18F8, 0xC, 0x10, 0x0, 0x10, 0x10, 0x20))}\n')
-            wheelieTimerSeq.append(memory.read_u32(pointer_chase(0x809C18F8, 0xC, 0x10, 0x0, 0x10, 0x10, 0x2A8)))
+            # out.write(f'{i}: {memory.read_u32(pointer_chase(0x809C18F8, 0xC, 0x10, 0x0, 0x10, 0x10, 0x2A8))}, {memory.read_f32(pointer_chase(0x809C18F8, 0xC, 0x10, 0x0, 0x10, 0x10, 0x20))}\n')
+            wheelieTimerSeq.append(memory.read_u32(pointer_chase(
+                0x809C18F8, 0xC, 0x10, 0x0, 0x10, 0x10, 0x2A8)))
             controller.set_gc_buttons(0, inputs)
             await event.frameadvance()
 
-        #create training data
+        # create training data
         for i, c in enumerate(wheelieTimerSeq):
             out.write(f'{i}: {c}\n')
         out.write('\nCreating training data...\n\n')
@@ -140,7 +152,7 @@ with open ('/home/brian/MKW-Chain-Classifier/leaderboard.json', 'r+') as leaderb
                 streak = 0
 
         out.write(str(chains)+'\n')
-        
+
         for chain in chains:
             label = ''
             match chain[1]:
@@ -156,17 +168,15 @@ with open ('/home/brian/MKW-Chain-Classifier/leaderboard.json', 'r+') as leaderb
             mkdir(f'{TRAINING_DIR}/{label}/{dataCount}')
 
             for i in range(25):
-                shutil.copyfile(f'/home/brian/Documents/Frames/{chain[0]-1+i}.png', f'{TRAINING_DIR}/{label}/{dataCount}/{i}.png')
+                shutil.copyfile(
+                    f'/home/brian/Documents/Frames/{chain[0]-1+i}.png', f'{TRAINING_DIR}/{label}/{dataCount}/{i}.png')
             out.write(f'Saved {label} chain #{dataCount}\n')
 
         out.flush()
-        
+
         leaderboard[runhash]['replayed'] = True
         leaderboardfile.seek(0)
         json.dump(leaderboard, leaderboardfile)
         leaderboardfile.truncate()
-        
-        
-    
-    out.write('Complete!')
 
+    out.write('Complete!')
