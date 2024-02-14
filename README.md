@@ -1,0 +1,1 @@
+For my senior research project at Thomas Jefferson High School for Science and Technology, I developed a 3D convolutional neural network using TensorFlow to classify different types of chain wheelies in Mario Kart Wii. Read about my work [here](./Research_Paper.pdf)!
